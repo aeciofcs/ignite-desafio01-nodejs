@@ -16,7 +16,7 @@ function checksExistsUserAccount(request, response, next) {
   const user         = users.find( user => user.username === username );
 
   if(!user){
-    return response.status(400).json({error: "User not found! "});
+    return response.status(404).json({ error: "User not found! " });
   }
 
   request.user = user;
@@ -48,7 +48,7 @@ app.post('/users', (request, response) => {
 app.get('/todos', checksExistsUserAccount, (request, response) => {
   // Complete aqui
   const { user } = request;
-
+  
   return response.json(user.todos);
 });
 
@@ -67,7 +67,7 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
 
   user.todos.push(todo);
 
-  return response.status(201).json();
+  return response.status(201).json(todo);
 });
 
 app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
@@ -79,34 +79,48 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
   const todo = user.todos.find(todo => todo.id === id );
 
   if(!todo){
-    return response.status(401).json({error: " TODO not found!! " });
+    return response.status(404).json({ error: " TODO not found!! " });
   }  
 
   todo.title    = title;
   todo.deadline = new Date(deadline);
 
-  return response.status(201).json();
+  return response.status(201).json(todo);
 
 });
 
 app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
   // Complete aqui
-  const { id }              = request.params;
-  const { user }            = request;
+  const { id }   = request.params;
+  const { user } = request;
 
-  const todo = user.todos.find(todo => todo.id === id );
+  const todo     = user.todos.find(todo => todo.id === id );
 
   if(!todo){
-    return response.status(401).json({error: " TODO not found!! " });
+    return response.status(404).json({ error: " TODO not found!! " });
   }
 
   todo.done = true;
 
-  return response.status(201).json()
+  return response.status(201).json(todo);
 });
 
 app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
   // Complete aqui
+  const { id }   = request.params;
+  const { user } = request;
+  
+  const todo = user.todos.find( todo => todo.id === id);
+
+  if(!todo){
+    return response.status(404).json({ error: " TODO not found!! " });
+  }
+
+  const indexTodo = user.todos.indexOf(todo);
+
+  user.todos.splice(indexTodo, 1)  
+
+  return response.status(204).json();
 });
 
 module.exports = app;
